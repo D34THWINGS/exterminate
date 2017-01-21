@@ -23,7 +23,6 @@ public class Player : MonoBehaviour {
 
 
 	private void SetLocation () {
-		Debug.Log (board.Size.ToString ());
 		transform.localPosition = new Vector3 (coordinates.x - board.Size.x * 0.5f + 0.5f, coordinates.y - board.Size.y * 0.5f + 0.5f, -0.1f);
 	}
 
@@ -32,18 +31,13 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Move (int speed) {
-		Vector2 direction = transform.forward;
+		Vector2 direction = transform.up;
 
 		for (int i = 0; i < speed; i++) {
-			Debug.DrawRay(transform.localPosition, direction, Color.blue);
-			RaycastHit2D hit = Physics2D.Raycast(transform.localPosition, direction, 2f, wallLayer);
-
+			RaycastHit2D hit = Physics2D.Raycast(transform.localPosition, direction, 1f, wallLayer);
 			if (hit.collider == null) {
-
-				var deltaX = transform.forward.x > transform.forward.y ? 1 : 0;
-				var deltaY = transform.forward.x < transform.forward.y ? 1 : 0;
-
-				Coordinates = new IntVector2 ( Coordinates.x + deltaX, Coordinates.y + deltaY);
+				Debug.Log(coordinates);
+				Coordinates = new IntVector2 ( Coordinates.x + (int)transform.up.x, Coordinates.y + (int)transform.up.y);
 			}
 		}
 	}

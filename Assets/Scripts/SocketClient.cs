@@ -17,25 +17,25 @@ public class SocketClient : MonoBehaviour {
     private GameManager manager;
 
     public void Start () {
-        manager = GetComponent<GameManager>();
+        // manager = GetComponent<GameManager>();
 
-        client = new TcpClient(ip, port);
+        // client = new TcpClient(ip, port);
         
-        s = client.GetStream();
-        sr = new StreamReader(s);
-        sw = new StreamWriter(s);
+        // s = client.GetStream();
+        // sr = new StreamReader(s);
+        // sw = new StreamWriter(s);
         
-        this.WriteEvent(ClientEvents.StartGame, new List<int>() {
-            1234,
-            5678,
-            90
-        });
+        // this.WriteEvent(ClientEvents.StartGame, new List<int>() {
+        //     1234,
+        //     5678,
+        //     90
+        // });
     }
 
     public void Update () {
-        if (!sr.EndOfStream) {
-            ReadEvent();
-        }
+        // if (!sr.EndOfStream) {
+        //     ReadEvent();
+        // }
     }
 
     public void WriteEvent(ClientEvents eventCode, List<int> args) {
@@ -77,6 +77,6 @@ public enum ServerEvents {
 }
 
 public enum ClientEvents {
-    StartGame, 
-    NextTurn
+    StartGame = 0, 
+    NextTurn = 1
 }
