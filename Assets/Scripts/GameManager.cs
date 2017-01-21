@@ -62,7 +62,8 @@ public class GameManager : MonoBehaviour {
 
 
         foreach (var action in data.Skip(1)) {
-            switch ((Action)int.Parse(action)) {
+            var actionData = action.Split(':');
+            switch ((Action) int.Parse(actionData[0])) {
                 case Action.FWD1:
                     player.Move(1);
                     break;

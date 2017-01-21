@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+ using System.Threading;
 
 public class SocketClient : MonoBehaviour {
 
@@ -15,27 +16,41 @@ public class SocketClient : MonoBehaviour {
     private StreamWriter sw;
 
     private GameManager manager;
+    private Thread workerThread;
+    private List<string> events;
 
     public void Start () {
-        // manager = GetComponent<GameManager>();
+        manager = GetComponent<GameManager>();
 
-        // client = new TcpClient(ip, port);
+        client = new TcpClient(ip, port);
         
-        // s = client.GetStream();
-        // sr = new StreamReader(s);
-        // sw = new StreamWriter(s);
-        
-        // this.WriteEvent(ClientEvents.StartGame, new List<int>() {
-        //     1234,
-        //     5678,
-        //     90
-        // });
+        s = client.GetStream();
+        sr = new StreamReader(s);
+        sw = new StreamWriter(s);
+
+        this.WriteEvent(ClientEvents.StartGame, new List<int>() {
+            1234,
+            5678,
+            90
+        });
+
+        workerThread = new Thread(new ThreadStart(ReadEvent));
+        workerThread.Start();
+
+        events = new List<string>();
     }
 
     public void Update () {
-        // if (!sr.EndOfStream) {
-        //     ReadEvent();
-        // }
+        lock(events) {
+            if (events.Count > 0) {
+                foreach (var payload in events) {
+                    var data = payload.Split('.');
+                    var eventType = int.Parse(data[0]);
+                    this.HandleEvents((ServerEvents) eventType, data.Skip(1));
+                }
+                events.Clear();
+            }
+        }
     }
 
     public void WriteEvent(ClientEvents eventCode, List<int> args) {
@@ -50,10 +65,15 @@ public class SocketClient : MonoBehaviour {
     }
 
     public void ReadEvent() {
-        var payload = sr.ReadToEnd();
-        var data = payload.Split('.');
-        var eventType = int.Parse(data[0]);
-        HandleEvents((ServerEvents) eventType, data.Skip(1));
+        while(true) {
+            if (!sr.EndOfStream) {
+                var payload = sr.ReadLine();
+                print(payload);
+                lock(events) {
+                    events.Add(payload);
+                }
+            }
+        }
     }
 
     public void HandleEvents(ServerEvents eventType, IEnumerable<string> data) {
