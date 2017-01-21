@@ -13,9 +13,12 @@ public class SocketClient : MonoBehaviour {
     private Stream s;
     private StreamReader sr;
     private StreamWriter sw;
-    private ServerEvents se;
+
+    private GameManager manager;
 
     public void Start () {
+        manager = GetComponent<GameManager>();
+
         client = new TcpClient(ip, port);
         
         s = client.GetStream();
@@ -31,7 +34,7 @@ public class SocketClient : MonoBehaviour {
 
     public void Update () {
         if (!sr.EndOfStream) {
-            print(sr.ReadToEnd());
+            ReadEvent();
         }
     }
 
@@ -50,18 +53,16 @@ public class SocketClient : MonoBehaviour {
         var payload = sr.ReadToEnd();
         var data = payload.Split('.');
         var eventType = int.Parse(data[0]);
-        this.HandleEvents((ServerEvents) eventType, data.Skip(1));
+        HandleEvents((ServerEvents) eventType, data.Skip(1));
     }
 
     public void HandleEvents(ServerEvents eventType, IEnumerable<string> data) {
-        switch (se) {
+        switch (eventType) {
             case ServerEvents.Start:
+                manager.GeneratePlayer (data);
                 break;
-            case ServerEvents.Stop:
-                break;
-            case ServerEvents.Rotate:
-                break;
-            case ServerEvents.Move:
+            case ServerEvents.Perform:
+                manager.Perform (data);
                 break;
             default:
                 break;
@@ -70,12 +71,12 @@ public class SocketClient : MonoBehaviour {
 }
 
 public enum ServerEvents {
-    Start = 1,
-    Stop = 2,
-    Rotate = 4,
-    Move = 8
+    Nop = -1,
+    Start = 0,
+    Perform = 1
 }
 
 public enum ClientEvents {
-    StartGame
+    StartGame, 
+    NextTurn
 }

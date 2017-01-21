@@ -26,10 +26,10 @@ public static class Directions {
 	};
 
 	private static Quaternion[] rotations = {
+		Quaternion.Euler(0f, 0f, 90f),
 		Quaternion.identity,
-		Quaternion.Euler(0f, 90f, 0f),
-		Quaternion.Euler(0f, 180f, 0f),
-		Quaternion.Euler(0f, 270f, 0f)
+		Quaternion.Euler(0f, 0f, 270f),
+		Quaternion.Euler(0f, 0f, 180f)	
 	};
 
 	public static Direction GetOpposite (this Direction direction) {
