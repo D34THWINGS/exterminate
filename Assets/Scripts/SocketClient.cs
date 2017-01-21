@@ -1,7 +1,8 @@
 using System.IO;
 using System.Net.Sockets;
 using UnityEngine;
-
+using System.Collections.Generic;
+using System.Linq;
 
 public class SocketClient : MonoBehaviour {
 
@@ -12,46 +13,70 @@ public class SocketClient : MonoBehaviour {
     private Stream s;
     private StreamReader sr;
     private StreamWriter sw;
-    private ServerEvents se;
+
+    private GameManager manager;
 
     public void Start () {
+        manager = GetComponent<GameManager>();
+
         client = new TcpClient(ip, port);
         
         s = client.GetStream();
         sr = new StreamReader(s);
         sw = new StreamWriter(s);
-        sw.AutoFlush = true;
-        sw.Write(12345678912345678913);
-        sw.Write(12345678912345678913);
-
+        
+        this.WriteEvent(ClientEvents.StartGame, new List<int>() {
+            1234,
+            5678,
+            90
+        });
     }
 
     public void Update () {
-        se = (ServerEvents) sr.Read ();
+        if (!sr.EndOfStream) {
+            ReadEvent();
+        }
+    }
 
-        switch (se) {
+    public void WriteEvent(ClientEvents eventCode, List<int> args) {
+        sw.Write((int) eventCode);
+        sw.Write('.');
+        args.ForEach(arg => {
+            sw.Write(arg);
+            sw.Write('.');
+        });
+        sw.Write("EOL");
+        sw.Flush();
+    }
+
+    public void ReadEvent() {
+        var payload = sr.ReadToEnd();
+        var data = payload.Split('.');
+        var eventType = int.Parse(data[0]);
+        HandleEvents((ServerEvents) eventType, data.Skip(1));
+    }
+
+    public void HandleEvents(ServerEvents eventType, IEnumerable<string> data) {
+        switch (eventType) {
             case ServerEvents.Start:
+                manager.GeneratePlayer (data);
                 break;
-            case ServerEvents.Stop:
-                break;
-            case ServerEvents.Rotate:
-                break;
-            case ServerEvents.Move:
+            case ServerEvents.Perform:
+                manager.Perform (data);
                 break;
             default:
                 break;
         }
-
     }
 }
 
 public enum ServerEvents {
-    Start = 1,
-    Stop = 2,
-    Rotate = 4,
-    Move = 8
+    Nop = -1,
+    Start = 0,
+    Perform = 1
 }
 
 public enum ClientEvents {
-
+    StartGame, 
+    NextTurn
 }
