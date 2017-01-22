@@ -4,13 +4,29 @@ using UnityEngine;
 
 public class CellRotor : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
+	private Player player;
+	public int angle;
+
+	void OnTriggerEnter2D(Collider2D other)
+	{
+		Debug.Log (other.name);
+		if (other.tag == "Player") {
+			player = other.GetComponent<Player>();
+		}
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+
+	void OnTriggerExit2D(Collider2D other)
+	{
+		if (other.tag == "Player") {
+			player = null;
+		}
+	}
+
+	public void Rotate() {
+		if (player != null) {
+			// Start animation 
+
+			player.Rotate((float)angle); // A changer contre un Lerp pour plus de smoothness
+		}
 	}
 }

@@ -8,6 +8,8 @@ public class CellCheckpoint : MonoBehaviour {
     {
         if (other.tag == "Player") {
             // Play nice little music
+
+            other.GetComponent<Player> ().SetCheckpoint ();
         }
     }
 
