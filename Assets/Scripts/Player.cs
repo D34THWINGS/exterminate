@@ -33,8 +33,8 @@ public class Player : MonoBehaviour {
 	private Quaternion originRotation;
 	private Vector3 originCoordinates;
 	private AnimationTypes animationType;
-	private float animationStartTime = 0f;
-	public float animationDuration = 300f;
+	public float animationStartTime = 0f;
+	public float animationDuration = 900f;
 	public delegate void HandleAnimationEnd();
 	public event HandleAnimationEnd onAnimationEnd;
 
@@ -51,7 +51,6 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Rotate (float angle, float? speed) {
-		Debug.Log("Init Rotate: " + DateTime.Now.Millisecond);
 		animationStartTime = DateTime.Now.Millisecond;
 		originRotation = transform.localRotation;
 		animationType = AnimationTypes.Rotate;
@@ -63,16 +62,15 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Move (int speed) {
-		Debug.Log("Init Move: " + DateTime.Now.Millisecond);
 		animationStartTime = DateTime.Now.Millisecond;
 		originCoordinates = transform.localPosition;
 		animationType = AnimationTypes.Translate;
-		Vector2 direction = transform.up;
+		Vector2 direction = speed > 0f ? transform.up : -transform.up;
 
-		for (int i = 0; i < speed; i++) {
+		for (int i = 0; i < Mathf.Abs(speed); i++) {
 			RaycastHit2D hit = Physics2D.Raycast(transform.localPosition, direction, 1f, wallLayer);
 			if (hit.collider == null) {
-				Coordinates = new IntVector2 ( Coordinates.x + Mathf.RoundToInt(transform.up.x), Coordinates.y + Mathf.RoundToInt(transform.up.y));
+				Coordinates = new IntVector2 ( Coordinates.x + Mathf.RoundToInt(direction.x), Coordinates.y + Mathf.RoundToInt(direction.y));
 			}
 		}
 	}
@@ -90,7 +88,6 @@ public class Player : MonoBehaviour {
 		Coordinates = lastCheckPoint;
 		transform.localScale = new Vector3 (0.8f, 0.8f, 0);
 		transform.localRotation = Quaternion.identity;
-		//token.enabled = true;
 	}
 
 	public void Update () {
@@ -112,12 +109,11 @@ public class Player : MonoBehaviour {
 	void FixedUpdate() {
 		if (animationStartTime != 0f) {
 			var progress = Mathf.Min(Mathf.Abs(DateTime.Now.Millisecond - animationStartTime) / animationDuration, 1f);
-			Debug.Log (progress);
 			if (animationType == AnimationTypes.Rotate) {
-				transform.localRotation = Quaternion.Lerp(originRotation, finalRotation, 2f);
+				transform.localRotation = Quaternion.Lerp(originRotation, finalRotation, progress);
 			}
 			if (animationType == AnimationTypes.Translate) {
-				transform.localPosition = Vector3.Lerp(originCoordinates, finalPosition, 2f);	
+				transform.localPosition = Vector3.Lerp(originCoordinates, finalPosition, progress);
 			}
 
 			if (progress == 1f) {

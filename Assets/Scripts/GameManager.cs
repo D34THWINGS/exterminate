@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour {
             var data = p.Split(':');
             var player = Instantiate (playerPrefab) as Player;
             player.Coordinates = new IntVector2 (0, 0);
+            player.animationStartTime = 1f;
             player.GetComponent<SpriteRenderer>().sprite = playerSprites[int.Parse(data[1])];
             player.SetColor(playerColor[nbPlayer]);
             player.Id = data[0];
@@ -81,15 +82,15 @@ public class GameManager : MonoBehaviour {
         foreach (var payload in data) {
             var payloadData = payload.Split('|');
             string playerId = payloadData.First();
-            var actions = payloadData.Skip(1);
+            var actions = payloadData.Skip(1).ToList();
 
             foreach (var action in actions) {
                 var actionData = action.Split(':');
-                orders.Add(new Order(playerId, int.Parse(actionData[0]), (Action)int.Parse(actionData[1])));
+                orders.Add(new Order(playerId, int.Parse(actionData[1]), (Action)int.Parse(actionData[0]), actions.IndexOf(action)));
             }
         }
 
-        RecursivePerform(orders);
+        RecursivePerform(orders.OrderBy(order => order.turn).ThenBy(order => order.priority).ToList());
     }
 
     public void RecursivePerform (List<Order> orders) {
