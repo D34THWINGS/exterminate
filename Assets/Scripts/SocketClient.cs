@@ -28,11 +28,7 @@ public class SocketClient : MonoBehaviour {
         sr = new StreamReader(s);
         sw = new StreamWriter(s);
 
-        this.WriteEvent(ClientEvents.StartGame, new List<int>() {
-            1234,
-            5678,
-            90
-        });
+        this.WriteEvent(ClientEvents.StartGame, new List<string>());
 
         workerThread = new Thread(new ThreadStart(ReadEvent));
         workerThread.Start();
@@ -53,7 +49,7 @@ public class SocketClient : MonoBehaviour {
         }
     }
 
-    public void WriteEvent(ClientEvents eventCode, List<int> args) {
+    public void WriteEvent(ClientEvents eventCode, List<string> args) {
         sw.Write((int) eventCode);
         sw.Write('.');
         args.ForEach(arg => {
@@ -81,8 +77,8 @@ public class SocketClient : MonoBehaviour {
             case ServerEvents.Start:
                 manager.GeneratePlayer (data);
                 break;
-            case ServerEvents.Perform:
-                manager.Perform (data);
+            case ServerEvents.PlayerOrders:
+                manager.HandlePlayerOrders(data);
                 break;
             default:
                 break;
@@ -93,7 +89,7 @@ public class SocketClient : MonoBehaviour {
 public enum ServerEvents {
     Nop = -1,
     Start = 0,
-    Perform = 1
+    PlayerOrders = 1
 }
 
 public enum ClientEvents {
