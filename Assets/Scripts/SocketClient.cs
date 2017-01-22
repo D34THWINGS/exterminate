@@ -20,33 +20,33 @@ public class SocketClient : MonoBehaviour {
     private List<string> events;
 
     public void Start () {
-        // manager = GetComponent<GameManager>();
+        manager = GetComponent<GameManager>();
 
-        // client = new TcpClient(ip, port);
+        client = new TcpClient(ip, port);
         
-        // s = client.GetStream();
-        // sr = new StreamReader(s);
-        // sw = new StreamWriter(s);
+        s = client.GetStream();
+        sr = new StreamReader(s);
+        sw = new StreamWriter(s);
 
-        // this.WriteEvent(ClientEvents.StartGame, new List<string>());
+        this.WriteEvent(ClientEvents.StartGame, new List<string>());
 
-        // workerThread = new Thread(new ThreadStart(ReadEvent));
-        // workerThread.Start();
+        workerThread = new Thread(new ThreadStart(ReadEvent));
+        workerThread.Start();
 
-        // events = new List<string>();
+        events = new List<string>();
     }
 
     public void Update () {
-        // lock(events) {
-        //     if (events.Count > 0) {
-        //         foreach (var payload in events) {
-        //             var data = payload.Split('.');
-        //             var eventType = int.Parse(data[0]);
-        //             this.HandleEvents((ServerEvents) eventType, data.Skip(1));
-        //         }
-        //         events.Clear();
-        //     }
-        // }
+        lock(events) {
+            if (events.Count > 0) {
+                foreach (var payload in events) {
+                    var data = payload.Split('.');
+                    var eventType = int.Parse(data[0]);
+                    this.HandleEvents((ServerEvents) eventType, data.Skip(1));
+                }
+                events.Clear();
+            }
+        }
     }
 
     public void WriteEvent(ClientEvents eventCode, List<string> args) {

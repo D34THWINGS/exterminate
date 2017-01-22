@@ -35,7 +35,22 @@ public class GameManager : MonoBehaviour {
 
     public void BeginGame () {
         isOver = false;
-        GeneratePlayer(new List<string>(){"aaa:0"});
+        // GeneratePlayer (new List<string>(){"aaa:0"});
+        // Debug.Log("Player Generated");
+        // RecursivePerform (
+        //     new List<Order>() {
+        //         new Order("aaa", 1, Action.FWD1),
+        //         new Order("aaa", 2, Action.RIGHT),
+        //          new Order("aaa", 3, Action.FWD1),
+        //          new Order("aaa", 4, Action.LEFT),
+        //          new Order("aaa", 5, Action.FWD2),
+        //          new Order("aaa", 6, Action.FWD1),
+        //          new Order("aaa", 7, Action.FWD1),
+        //          new Order("aaa", 8, Action.BKWD),
+        //          new Order("aaa", 9, Action.FWD1)
+        //     }
+        // );
+        // Debug.Log("Order Performed");
     }
 
     public void RestartGame () {
@@ -62,48 +77,59 @@ public class GameManager : MonoBehaviour {
     }
 
     public void HandlePlayerOrders(IEnumerable<string> data) {
+        var orders = new List<Order>();
         foreach (var payload in data) {
-            Perform (payload.Split('|'));
-        }
-        PlayEnvironment();
-        socket.WriteEvent(ClientEvents.NextTurn, new List<string>());
-    }
+            var payloadData = payload.Split('|');
+            string playerId = payloadData.First();
+            var actions = payloadData.Skip(1);
 
-    public void Perform (IEnumerable<string> data) {
-
-        string playerId = data.First();
-        print(playerId);
-        var player = GetPlayer (playerId);
-
-
-        foreach (var action in data.Skip(1)) {
-            var actionData = action.Split(':');
-            switch ((Action) int.Parse(actionData[0])) {
-                case Action.FWD1:
-                    player.Move(1);
-                    break;
-                case Action.FWD2:
-                    player.Move(2);
-                    break;
-                case Action.FWD3:
-                    player.Move(3);
-                    break;
-                case Action.BKWD:
-                    player.Move(-1);
-                    break;
-                case Action.LEFT:
-                    player.Rotate(90, null);
-                    break;
-                case Action.RIGHT:
-                    player.Rotate(-90, null);
-                    break;
-                case Action.UTURN:
-                    player.Rotate(180, null);
-                    break;
-                default:
-                    break;
+            foreach (var action in actions) {
+                var actionData = action.Split(':');
+                orders.Add(new Order(playerId, int.Parse(actionData[0]), (Action)int.Parse(actionData[1])));
             }
         }
+
+        RecursivePerform(orders);
+    }
+
+    public void RecursivePerform (List<Order> orders) {
+        if (orders.Count == 0) {
+            PlayEnvironment();
+            socket.WriteEvent(ClientEvents.NextTurn, new List<string>());
+            return;
+        }
+
+        var player = GetPlayer (orders.First().playerId);
+        switch (orders.First().action) {
+            case Action.FWD1:
+                player.Move(1);
+                break;
+            case Action.FWD2:
+                player.Move(2);
+                break;
+            case Action.FWD3:
+                player.Move(3);
+                break;
+            case Action.BKWD:
+                player.Move(-1);
+                break;
+            case Action.LEFT:
+                player.Rotate(90, null);
+                break;
+            case Action.RIGHT:
+                player.Rotate(-90, null);
+                break;
+            case Action.UTURN:
+                player.Rotate(180, null);
+                break;
+            default:
+                break;
+        }
+
+        player.onAnimationEnd += () => {
+            player.ResetAnimationHandlers();
+            RecursivePerform(orders.Skip(1).ToList());
+        };
     }
 
     public void PlayEnvironment() {
