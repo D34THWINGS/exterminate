@@ -7,6 +7,9 @@ public class CellRotor : MonoBehaviour {
 	private Player player;
 	public int angle;
 
+	private SoundManager soundMng;
+	public AudioClip rotate;
+
 	void OnTriggerEnter2D(Collider2D other)
 	{
 		Debug.Log (other.name);
@@ -25,6 +28,8 @@ public class CellRotor : MonoBehaviour {
 	public void Rotate() {
 		if (player != null) {
 			// Start animation 
+
+			soundMng.PlaySingle (rotate);
 
 			player.Rotate((float)angle); // A changer contre un Lerp pour plus de smoothness
 		}

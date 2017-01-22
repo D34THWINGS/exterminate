@@ -7,6 +7,8 @@ public class CellConveyor : MonoBehaviour {
 	private Player player;
 	public CellConveyor nextConveyor;
 	public Direction direction;
+	private SoundManager soundMng;
+	public AudioClip translate;
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
@@ -26,6 +28,8 @@ public class CellConveyor : MonoBehaviour {
 	public void Translate () {
 		if (player != null) {
 			// Start animation
+
+			soundMng.PlaySingle (translate);
 
 			player.MoveLerp(direction);
 			if (nextConveyor != null) {
