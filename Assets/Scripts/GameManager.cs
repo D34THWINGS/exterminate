@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour {
 
     public void BeginGame () {
         isOver = false;
-        GeneratePlayer (new List<string>(){"aaa.0"});
+        //GeneratePlayer (new List<string>(){"aaa.0"});
     }
 
     public void RestartGame () {
