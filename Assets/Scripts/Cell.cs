@@ -1,16 +1,14 @@
 ﻿using UnityEngine;
-using System;
 using Random = UnityEngine.Random;
 
 public class Cell : MonoBehaviour {
 	
-    private SpriteRenderer renderer;
     public Sprite[] sprites;
 
     
     public void Awake()
     {
-        renderer = GetComponent<SpriteRenderer> ();
+        var renderer = GetComponent<SpriteRenderer> ();
         renderer.sprite = sprites[Random.Range(0, sprites.Length)];
 
         var angle = Random.Range(0, 10);

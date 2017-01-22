@@ -1,20 +1,26 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CellConveyor : MonoBehaviour {
 
 	private Player player;
 	public CellConveyor nextConveyor;
 	public Direction direction;
+	public float conveySpeed;
 	private SoundManager soundMng;
 	public AudioClip translate;
+	private Animator anim;
+
+
+	public void Start () {
+		anim = GetComponent<Animator>();
+		soundMng = GameObject.Find("SoundManager").GetComponent<SoundManager>();
+	}
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
-		Debug.Log (other.name);
 		if (other.tag == "Player") {
 			player = other.GetComponent<Player> ();
+			//GameObject.Find("GameManager").GetComponent<GameManager> ().PlayEnvironment(); // TODO Delete
 		}
 	}
 
@@ -29,9 +35,13 @@ public class CellConveyor : MonoBehaviour {
 		if (player != null) {
 			// Start animation
 
-			soundMng.PlaySingle (translate);
+			if (!soundMng.IsPlayingFx())
+				soundMng.PlaySingle (translate);
 
-			player.MoveLerp(direction);
+
+			anim.SetTrigger ("Active");
+
+			player.MoveLerp(direction, conveySpeed);
 			if (nextConveyor != null) {
 				nextConveyor.player = player;
 				nextConveyor.Translate();

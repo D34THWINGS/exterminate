@@ -4,7 +4,8 @@ using System.Collections;
 public class SoundManager : MonoBehaviour 
 {
 	public AudioSource efxSource;                   
-	public AudioSource musicSource;                 
+	public AudioSource musicSource;
+	public AudioClip[] musicClips;                 
 	public static SoundManager instance = null;     
 	public float lowPitchRange = .95f;              
 	public float highPitchRange = 1.05f;            
@@ -40,5 +41,15 @@ public class SoundManager : MonoBehaviour
 		efxSource.clip = clips[randomIndex];
 		
 		efxSource.Play();
+	}
+
+	public void ChangeMusic (int musicId) {
+		musicSource.Stop();
+		musicSource.clip = musicClips[musicId];
+		musicSource.Play();
+	}
+
+	public bool IsPlayingFx () {
+		return efxSource.isPlaying;
 	}
 }

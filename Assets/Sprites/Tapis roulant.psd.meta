@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 08251094cd6c2fe488ab9d5cb4669dde
-timeCreated: 1485043625
+timeCreated: 1485084761
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -88,7 +88,7 @@ TextureImporter:
       name: Tapis roulant_1
       rect:
         serializedVersion: 2
-        x: 961
+        x: 1172
         y: 35
         width: 818
         height: 818
