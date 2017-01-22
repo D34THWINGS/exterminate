@@ -15,9 +15,12 @@ public class GameManager : MonoBehaviour {
 
     private List<Player> players;
     private Board board;
+    private SocketClient socket;
 
 
     public void Start () {
+        socket = GetComponent<SocketClient>();
+
         BeginGame ();
     }
 
@@ -54,10 +57,18 @@ public class GameManager : MonoBehaviour {
         return players.Where(p => p.Id == playerId).Single();
     }
 
+    public void HandlePlayerOrders(IEnumerable<string> data) {
+        foreach (var payload in data) {
+            Perform (payload.Split('|'));
+        }
+        socket.WriteEvent(ClientEvents.NextTurn, new List<string>());
+    }
+
     public void Perform (IEnumerable<string> data) {
         
 
         string playerId = data.First();
+        print(playerId);
         var player = GetPlayer (playerId);
 
 
