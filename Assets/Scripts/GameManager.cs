@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour {
     public Player playerPrefab;
     public Sprite[] playerSprites;
     public AudioClip[] spawnSound;
+    public Color[] playerColor;
     public IntVector2 Size;
 
     private List<CellConveyor> conveyors;
@@ -15,6 +16,7 @@ public class GameManager : MonoBehaviour {
     private List<Player> players;
     private SocketClient socket;
     private SoundManager soundMng;
+    private int nbPlayer;
 
 
     public void Start () {
@@ -33,7 +35,7 @@ public class GameManager : MonoBehaviour {
 
     public void BeginGame () {
         isOver = false;
-        //GeneratePlayer (new List<string>(){"aaa.0"});
+        GeneratePlayer(new List<string>(){"aaa:0"});
     }
 
     public void RestartGame () {
@@ -41,17 +43,16 @@ public class GameManager : MonoBehaviour {
     }
 
     public void GeneratePlayer (IEnumerable<string> playerIds) {
-        
-        Debug.Log (string.Join(", ", playerIds.ToArray()));
-
         soundMng.RandomizeSfx(spawnSound);
 
         players = playerIds.Select(p => {
-            var data = p.Split('.');
+            var data = p.Split(':');
             var player = Instantiate (playerPrefab) as Player;
             player.Coordinates = new IntVector2 (0, 0);
             player.GetComponent<SpriteRenderer>().sprite = playerSprites[int.Parse(data[1])];
+            player.SetColor(playerColor[nbPlayer]);
             player.Id = data[0];
+            nbPlayer++;
             return player;
         }).ToList();
     }

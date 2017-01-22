@@ -10,7 +10,12 @@ public class Player : MonoBehaviour {
 
 	private Quaternion finalRotation;
 	private float speedR;
+	public SpriteRenderer token;
 	
+	public void SetColor(Color color) {
+		token.color = color;
+	}
+
 	private IntVector2 coordinates;
 	public IntVector2 Coordinates {
 		get {
@@ -68,6 +73,7 @@ public class Player : MonoBehaviour {
 		Coordinates = lastCheckPoint;
 		transform.localScale = new Vector3 (0.8f, 0.8f, 0);
 		transform.localRotation = Quaternion.identity;
+		//token.enabled = true;
 	}
 
 	public void Update () {

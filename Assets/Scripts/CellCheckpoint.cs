@@ -8,6 +8,7 @@ public class CellCheckpoint : MonoBehaviour {
     private List<string> players;
     public void Start () {
         soundMng = GameObject.Find("SoundManager").GetComponent<SoundManager>();
+        players = new List<string>();
     }
 
     void OnTriggerEnter2D(Collider2D other)
