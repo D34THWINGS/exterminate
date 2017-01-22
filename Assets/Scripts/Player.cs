@@ -24,6 +24,14 @@ public class Player : MonoBehaviour {
 
 	public string Id { get; set; }
 
+	private Quaternion originRotation;
+	private Vector3 originCoordinates;
+	private AnimationTypes animationType;
+	private float animationStartTime = 0f;
+	public float animationDuration = 300f;
+	public delegate void HandleAnimationEnd();
+	public event HandleAnimationEnd onAnimationEnd;
+
 	public void Awake () {
 		boardSize = GameObject.Find ("GameManager").GetComponent<GameManager>().Size;
 	}
@@ -37,6 +45,9 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Rotate (float angle, float? speed) {
+		animationStartTime = Time.time;
+		originRotation = transform.localRotation;
+		animationType = AnimationTypes.Rotate;
 		finalRotation = transform.localRotation * Quaternion.Euler(0,0, angle);
 		if (speed.HasValue)
 			speedR = speed.Value;
@@ -45,6 +56,9 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Move (int speed) {
+		animationStartTime = Time.time;
+		originCoordinates = transform.localPosition;
+		animationType = AnimationTypes.Translate;
 		Vector2 direction = transform.up;
 
 		for (int i = 0; i < speed; i++) {
@@ -81,11 +95,33 @@ public class Player : MonoBehaviour {
 			Rotate (180, null);
 		}
 	}
+
+	public void ResetAnimationHandlers() {
+		onAnimationEnd = null;
+	}
 	
-	void FixedUpdate()
-	{
-		transform.localRotation = Quaternion.Lerp(transform.localRotation, finalRotation, speedR * Time.deltaTime);
-		transform.localPosition = Vector3.Lerp(transform.localPosition, finalPosition, speedT * Time.deltaTime);		
+	void FixedUpdate() {
+		if (animationStartTime != 0f) {
+			var progress = Mathf.Min(Time.time - animationStartTime / animationDuration, 1f);
+			if (animationType == AnimationTypes.Rotate) {
+				transform.localRotation = Quaternion.Lerp(originRotation, finalRotation, progress);
+			}
+			if (animationType == AnimationTypes.Translate) {
+				transform.localPosition = Vector3.Lerp(originCoordinates, finalPosition, progress);	
+			}
+
+			if (progress == 1f) {
+				animationStartTime = 0f;
+				if (onAnimationEnd != null) {
+					onAnimationEnd();
+				}
+			}
+		}
 	}
 
+}
+
+public enum AnimationTypes {
+	Translate,
+	Rotate
 }
