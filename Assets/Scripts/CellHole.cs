@@ -15,10 +15,14 @@ public class CellHole : MonoBehaviour {
 	void OnTriggerEnter2D(Collider2D other)
 	{
 		if (other.tag == "Player") {
-			soundMng.PlaySingle (fallDown);
-			player = other.transform;
-			player.GetComponent<Player> ().token.enabled = false;
-			isFalling = true;
+			var playerComp = player.GetComponent<Player> ();
+			if (!playerComp.IsLocked()) {
+				soundMng.PlaySingle (fallDown);
+				player = other.transform;
+				playerComp.token.enabled = false;
+				playerComp.Kill();
+				isFalling = true;
+			}
 		}
 	}
 
@@ -33,6 +37,9 @@ public class CellHole : MonoBehaviour {
 			// Scale down to hell
 			player.localScale = new Vector3(0.8f-timer/2,0.8f-timer/2,0);
 			timer += Time.deltaTime;
+
+			print(timer);
+			print(fallTime);
 
 			// call Respawn
 			if (fallTime < timer) {

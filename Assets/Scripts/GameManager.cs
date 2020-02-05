@@ -64,7 +64,6 @@ public class GameManager : MonoBehaviour {
             var data = p.Split(':');
             var player = Instantiate (playerPrefab) as Player;
             player.Coordinates = new IntVector2 (0, 0);
-            player.animationStartTime = 1f;
             player.GetComponent<SpriteRenderer>().sprite = playerSprites[int.Parse(data[1])];
             player.SetColor(playerColor[nbPlayer]);
             player.Id = data[0];
@@ -83,6 +82,7 @@ public class GameManager : MonoBehaviour {
             var payloadData = payload.Split('|');
             string playerId = payloadData.First();
             var actions = payloadData.Skip(1).ToList();
+            GetPlayer (playerId).Unlock();
 
             foreach (var action in actions) {
                 var actionData = action.Split(':');

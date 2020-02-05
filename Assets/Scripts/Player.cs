@@ -33,8 +33,8 @@ public class Player : MonoBehaviour {
 	private Quaternion originRotation;
 	private Vector3 originCoordinates;
 	private AnimationTypes animationType;
-	public float animationStartTime = 0f;
-	public float animationDuration = 900f;
+	private float animationStartTime = 1f;
+	public float animationDuration = 0.9f;
 	public delegate void HandleAnimationEnd();
 	public event HandleAnimationEnd onAnimationEnd;
 
@@ -43,15 +43,22 @@ public class Player : MonoBehaviour {
 	}
 
 
+	private bool actionsLocked;
 	private Vector3 finalPosition;
 	private float speedT;
 	private void SetLocation () {
+		animationStartTime = Time.time;
+		originCoordinates = transform.localPosition;
 		finalPosition = new Vector3 (coordinates.x - boardSize.x * 0.5f + 0.5f, coordinates.y - boardSize.y * 0.5f + 0.5f, transform.localPosition.z);
 		speedT = moveSpeed;
 	}
 
 	public void Rotate (float angle, float? speed) {
-		animationStartTime = DateTime.Now.Millisecond;
+		if (actionsLocked) {
+			return;
+		}
+
+		animationStartTime = Time.time;
 		originRotation = transform.localRotation;
 		animationType = AnimationTypes.Rotate;
 		finalRotation = transform.localRotation * Quaternion.Euler(0,0, angle);
@@ -62,8 +69,10 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Move (int speed) {
-		animationStartTime = DateTime.Now.Millisecond;
-		originCoordinates = transform.localPosition;
+		if (actionsLocked) {
+			return;
+		}
+
 		animationType = AnimationTypes.Translate;
 		Vector2 direction = speed > 0f ? transform.up : -transform.up;
 
@@ -90,6 +99,22 @@ public class Player : MonoBehaviour {
 		transform.localRotation = Quaternion.identity;
 	}
 
+	public void Kill() {
+		actionsLocked = true;
+		animationStartTime = 0f;
+		if (onAnimationEnd != null) {
+			onAnimationEnd();
+		}
+	}
+
+	public void Unlock() {
+		actionsLocked = false;
+	}
+
+	public bool IsLocked() {
+		return actionsLocked;
+	}
+
 	public void Update () {
 		if (Input.GetKeyDown (KeyCode.Z)) {
 			Move (1);
@@ -108,7 +133,7 @@ public class Player : MonoBehaviour {
 	
 	void FixedUpdate() {
 		if (animationStartTime != 0f) {
-			var progress = Mathf.Min(Mathf.Abs(DateTime.Now.Millisecond - animationStartTime) / animationDuration, 1f);
+			var progress = Mathf.Min(Mathf.Abs(Time.time - animationStartTime) / animationDuration, 1f);
 			if (animationType == AnimationTypes.Rotate) {
 				transform.localRotation = Quaternion.Lerp(originRotation, finalRotation, progress);
 			}
@@ -116,7 +141,7 @@ public class Player : MonoBehaviour {
 				transform.localPosition = Vector3.Lerp(originCoordinates, finalPosition, progress);
 			}
 
-			if (progress == 1f) {
+			if (progress >= 1f) {
 				animationStartTime = 0f;
 				if (onAnimationEnd != null) {
 					onAnimationEnd();
